@@ -17,3 +17,6 @@ cpi_df = pd.read_csv('../economy/Consumer Price Index for Sri Lanka.csv')
 ## Population data
 population_df = pd.read_csv('../economy/Populaton total.csv')
 
+
+
+
