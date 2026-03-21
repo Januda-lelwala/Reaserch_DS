@@ -51,7 +51,7 @@
 ## Outputs
 - [x] Descriptive report of underemployment dynamics (RQ1)
 - [x] Ranked indicator list by association strength (RQ2)
-- [ ] Structural break report with interaction coefficients (RQ3)
+- [x] Structural break report with interaction coefficients (RQ3)
 - [x] ARDL/VECM long-run coefficients with CIs (RQ4)
 - [x] Policy brief mapping top indicators to interventions
 - [ ] Sensitivity analysis across both underemployment definitions
