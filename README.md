@@ -25,3 +25,8 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt # containing pandas, seaborn, scikit-learn, shap, statsmodels
 ```
+## Advanced Diagnostic Visualizations
+To supplement the primary dashboard, we developed deeper diagnostic visualizations (`Data_Analysis/Advanced_EDA_Dashboard.ipynb`) to robustly prove our econometric constraints before forecasting:
+- **Demographic Disparity**: Highlights how female workers transition into underemployment at steeper angles than their male counterparts during shocks.
+- **Time-Lagged Cross-Correlation (TLCC)**: Confirms the presence of extreme downstream delays (GDP/Inflation effects lagging by multiple quarters), strictly justifying the **VECM / ARDL** causal models over simpler multi-variate regressions.
+- **Quarterly Outlier Stationarity**: Provides the base rationale for the structural tuning of hyperparameters in the **SARIMA** approach.
