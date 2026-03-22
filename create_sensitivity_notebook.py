@@ -45,8 +45,8 @@ QUAL_DATA_PATH = os.path.join(BASE_DIR, 'extraction', 'qualification_underemploy
 master_df = pd.read_csv(MASTER_DATA_PATH)
 qual_df = pd.read_csv(QUAL_DATA_PATH)
 
-# The master_dataset has lowercase column names in some phases, let's normalize
-master_df.columns = [str(c).title().replace('_Pct', '_pct').replace('_Rate', '_Rate') for c in master_df.columns]
+# The master_dataset has lowercase column names in some phases and extra spaces, let's normalize
+master_df.columns = [str(c).strip().title().replace('_Pct', '_pct').replace('_Rate', '_Rate') for c in master_df.columns]
 if 'Year' not in master_df.columns and 'Date' in master_df.columns:
     master_df['Year'] = pd.to_datetime(master_df['Date']).dt.year
 
