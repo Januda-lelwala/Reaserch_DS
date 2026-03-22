@@ -7,6 +7,5 @@ all_data/
 labour_data_analysis_copy/
 
 *.txt
-*.png
 
 !requirements.txt
