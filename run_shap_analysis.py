@@ -229,45 +229,134 @@ print("\n" + "=" * 60)
 print("CREATE VISUALIZATIONS")
 print("=" * 60)
 
-# Summary plots
-fig, axes = plt.subplots(2, 2, figsize=(16, 12))
+# Debug SHAP values
+print(f"\nSHAP values statistics:")
+print(f"  Min: {shap_values.min():.6f}, Max: {shap_values.max():.6f}")
+print(f"  Mean: {shap_values.mean():.6f}, Std: {shap_values.std():.6f}")
+print(f"  Contains NaN: {np.isnan(shap_values).any()}")
+print(f"  Contains Inf: {np.isinf(shap_values).any()}")
+print(f"  Number of samples: {shap_values.shape[0]}")
 
-# Plot 1: Summary scatter
-ax1 = axes[0, 0]
+# Summary plots with improved visualization
+fig = plt.figure(figsize=(18, 12))
+gs = fig.add_gridspec(3, 2, hspace=0.3, wspace=0.3)
+
+# Plot 1: Enhanced Summary scatter - colored by magnitude
+ax1 = fig.add_subplot(gs[0, :])
 plt.sca(ax1)
-shap.summary_plot(shap_values, X_test, plot_type="scatter", show=False)
-ax1.set_title("SHAP Summary Plot (Scatter)", fontsize=12, fontweight='bold', pad=10)
 
-# Plot 2: Summary bar
-ax2 = axes[0, 1]
-plt.sca(ax2)
-shap.summary_plot(shap_values, X_test, plot_type="bar", show=False)
-ax2.set_title("SHAP Feature Importance", fontsize=12, fontweight='bold', pad=10)
+# Flatten SHAP values and feature values for visualization
+all_shap_flat = []
+all_feature_flat = []
+all_colors = []
+colors_map = plt.cm.tab10(np.linspace(0, 1, len(feature_cols)))
 
-# Plot 3: Feature importance custom
-ax3 = axes[1, 0]
+for i, feature in enumerate(feature_cols):
+    shap_vals = shap_values[:, i]
+    feature_vals = X_test.iloc[:, i].values
+    # Normalize feature values for x-axis positioning
+    feature_norm = (feature_vals - feature_vals.min()) / (feature_vals.max() - feature_vals.min() + 1e-8)
+    # Add horizontal offset for each feature to separate them
+    x_pos = i + feature_norm * 0.8
+    ax1.scatter(x_pos, shap_vals, alpha=0.6, s=80, color=colors_map[i], 
+               label=feature, edgecolors='k', linewidth=0.3)
+
+ax1.set_xticks(range(len(feature_cols)))
+ax1.set_xticklabels(feature_cols, fontsize=11, fontweight='bold')
+ax1.set_ylabel('SHAP Value', fontsize=12, fontweight='bold')
+ax1.set_title("SHAP Summary: Feature Contributions (Color-coded by Feature)", 
+              fontsize=13, fontweight='bold', pad=15)
+ax1.grid(alpha=0.3, axis='y')
+ax1.axhline(y=0, color='r', linestyle='--', linewidth=2, alpha=0.7, label='SHAP=0')
+ax1.legend(loc='upper right', fontsize=10)
+
+# Plot 2: Feature importance bar chart
+ax2 = fig.add_subplot(gs[1, 0])
 colors = plt.cm.RdYlGn_r(np.linspace(0.2, 0.8, len(feature_importance_df)))
-ax3.barh(range(len(feature_importance_df)), feature_importance_df['Mean_Abs_SHAP'], color=colors)
-ax3.set_yticks(range(len(feature_importance_df)))
-ax3.set_yticklabels(feature_importance_df['Feature'])
-ax3.set_xlabel('Mean |SHAP Value|', fontsize=11, fontweight='bold')
-ax3.set_title('Top Features by Impact', fontsize=12, fontweight='bold', pad=10)
-ax3.grid(axis='x', alpha=0.3)
+bars = ax2.barh(range(len(feature_importance_df)), feature_importance_df['Mean_Abs_SHAP'], color=colors)
+ax2.set_yticks(range(len(feature_importance_df)))
+ax2.set_yticklabels(feature_importance_df['Feature'], fontsize=11, fontweight='bold')
+ax2.set_xlabel('Mean |SHAP Value|', fontsize=11, fontweight='bold')
+ax2.set_title('Feature Importance by Impact', fontsize=12, fontweight='bold', pad=10)
+ax2.grid(axis='x', alpha=0.3)
+# Add value labels on bars
+for i, (idx, row) in enumerate(feature_importance_df.iterrows()):
+    ax2.text(row['Mean_Abs_SHAP'], i, f" {row['Mean_Abs_SHAP']:.4f}", 
+            va='center', fontsize=9, fontweight='bold')
+
+# Plot 3: Model performance
+ax3 = fig.add_subplot(gs[1, 1])
+ax3.axis('off')
+metrics_text = f"""
+Model Performance:
+━━━━━━━━━━━━━━━━━━━━━
+Model: {model_name}
+Test R² Score: {test_r2_gb:.4f}
+Test RMSE: {test_rmse_gb:.4f}%
+Test MAE: {test_mae_gb:.4f}%
+
+SHAP Summary:
+━━━━━━━━━━━━━━━━━━━━━
+Total Samples: {len(X_test)}
+Top Feature: {feature_importance_df.iloc[0]['Feature']}
+Impact Range: [{shap_values.min():.3f}, {shap_values.max():.3f}]
+"""
+ax3.text(0.05, 0.95, metrics_text, transform=ax3.transAxes, fontsize=11,
+        verticalalignment='top', fontfamily='monospace', 
+        bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
 
 # Plot 4: Residuals
 y_test_pred = best_model.predict(X_test)
 residuals = y_test - y_test_pred
-ax4 = axes[1, 1]
-ax4.scatter(y_test_pred, residuals, alpha=0.6, s=80, edgecolors='k', linewidth=0.5)
-ax4.axhline(y=0, color='r', linestyle='--', linewidth=2)
-ax4.set_xlabel('Predicted Unemployment Rate (%)', fontsize=11, fontweight='bold')
-ax4.set_ylabel('Residuals', fontsize=11, fontweight='bold')
-ax4.set_title('Prediction Residuals', fontsize=12, fontweight='bold', pad=10)
+ax4 = fig.add_subplot(gs[2, :])
+scatter = ax4.scatter(y_test_pred, residuals, alpha=0.6, s=80, c=residuals, 
+                     cmap='RdYlGn', edgecolors='k', linewidth=0.5)
+ax4.axhline(y=0, color='r', linestyle='--', linewidth=2, label='Perfect Fit')
+ax4.set_xlabel('Predicted Unemployment Rate (%)', fontsize=12, fontweight='bold')
+ax4.set_ylabel('Residuals', fontsize=12, fontweight='bold')
+ax4.set_title('Model Residuals: Prediction Errors', fontsize=13, fontweight='bold', pad=10)
 ax4.grid(alpha=0.3)
+ax4.legend(fontsize=10)
+cbar = plt.colorbar(scatter, ax=ax4, label='Residual Value')
+
+plt.savefig(base_path / 'shap_summary_plots.png', dpi=300, bbox_inches='tight')
+print("✓ Saved: shap_summary_plots.png (enhanced with color-coded features)")
+plt.close()
+
+# Create individual feature-level plots for better clarity
+fig, axes = plt.subplots(len(feature_cols), 2, figsize=(14, 4*len(feature_cols)))
+if len(feature_cols) == 1:
+    axes = axes.reshape(1, -1)
+
+for idx, feature in enumerate(feature_cols):
+    feature_idx = feature_cols.index(feature)
+    shap_vals = shap_values[:, feature_idx]
+    feature_vals = X_test.iloc[:, feature_idx].values
+    
+    # Left plot: SHAP value distribution
+    ax_left = axes[idx, 0]
+    ax_left.hist(shap_vals, bins=30, alpha=0.7, color='steelblue', edgecolor='black')
+    ax_left.axvline(shap_vals.mean(), color='red', linestyle='--', linewidth=2, label=f'Mean: {shap_vals.mean():.4f}')
+    ax_left.set_xlabel('SHAP Value', fontsize=11, fontweight='bold')
+    ax_left.set_ylabel('Frequency', fontsize=11, fontweight='bold')
+    ax_left.set_title(f'{feature}: SHAP Value Distribution', fontsize=12, fontweight='bold')
+    ax_left.grid(alpha=0.3)
+    ax_left.legend(fontsize=10)
+    
+    # Right plot: Feature vs SHAP scatter
+    ax_right = axes[idx, 1]
+    scatter = ax_right.scatter(feature_vals, shap_vals, alpha=0.6, s=80, 
+                              c=shap_vals, cmap='coolwarm', edgecolors='k', linewidth=0.3)
+    ax_right.axhline(y=0, color='gray', linestyle='--', linewidth=1, alpha=0.7)
+    ax_right.set_xlabel(f'{feature} Value', fontsize=11, fontweight='bold')
+    ax_right.set_ylabel('SHAP Value', fontsize=11, fontweight='bold')
+    ax_right.set_title(f'{feature}: Impact on Prediction', fontsize=12, fontweight='bold')
+    ax_right.grid(alpha=0.3)
+    cbar = plt.colorbar(scatter, ax=ax_right, label='SHAP Value')
 
 plt.tight_layout()
-plt.savefig(base_path / 'shap_summary_plots.png', dpi=300, bbox_inches='tight')
-print("✓ Saved: shap_summary_plots.png")
+plt.savefig(base_path / 'shap_feature_distributions.png', dpi=300, bbox_inches='tight')
+print("✓ Saved: shap_feature_distributions.png (detailed per-feature analysis)")
 plt.close()
 
 # Dependence plots for top features
