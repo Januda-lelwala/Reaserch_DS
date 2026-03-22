@@ -11,7 +11,7 @@
 - [x] Get agricultural output index from FAO/CEIC
 - [ ] Get monsoon/seasonal indicators from Met Department
 - [x] Handle missing values: KNN imputation (isolated), MICE (blocks)
-- [ ] Construct qualification-based underemployment proxy from occupational mismatch in LFS micro-data
+- [x] Construct qualification-based underemployment proxy from occupational mismatch in LFS micro-data
 - [x] Add crisis dummy (2022) and seasonal quarter dummies
 
 ---
