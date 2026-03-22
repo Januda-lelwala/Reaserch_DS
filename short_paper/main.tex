@@ -1,0 +1,135 @@
+\documentclass[sigconf]{acmart}
+
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{subcaption}
+
+%% \BibTeX command to typeset BibTeX logo in the docs
+\AtBeginDocument{%
+  \providecommand\BibTeX{{{\normalfont B\kern-.05em{\scshape i\kern-.025em b}\kern-.08em\TeX}}}
+}
+
+\begin{document}
+
+\title{Analysing the Economic Drivers of Underemployment in Sri Lanka: Preliminary Findings from the 2015--2025 Period}
+
+\author{Ekanayake T.N.D.S.W.}
+\email{thisene.23@cse.mrt.ac.lk}
+\affiliation{%
+  \institution{University of Moratuwa}
+  \city{Moratuwa}
+  \country{Sri Lanka}
+}
+
+\author{Bulagala D.W.K.G.}
+\email{gimsarab.23@cse.mrt.ac.lk}
+\affiliation{%
+  \institution{University of Moratuwa}
+  \city{Moratuwa}
+  \country{Sri Lanka}
+}
+
+\author{De Silva B.K.P.}
+\email{praveend.23@cse.mrt.ac.lk}
+\affiliation{%
+  \institution{University of Moratuwa}
+  \city{Moratuwa}
+  \country{Sri Lanka}
+}
+
+\author{Pabasara W.G.K.}
+\email{kusalp.23@cse.mrt.ac.lk}
+\affiliation{%
+  \institution{University of Moratuwa}
+  \city{Moratuwa}
+  \country{Sri Lanka}
+}
+
+\author{Lelwala J.U.P.}
+\email{janudal.23@cse.mrt.ac.lk}
+\affiliation{%
+  \institution{University of Moratuwa}
+  \city{Moratuwa}
+  \country{Sri Lanka}
+}
+
+\begin{abstract}
+Underemployment in Sri Lanka---encompassing both time-related underemployment and skills-based qualification mismatch---represents a growing yet heavily underanalysed dimension of labour market slack. While the headline unemployment rate remains artificially anchored around 3.8\%, time-related underemployment surged dramatically from 4.6\% to 8.3\% during the 2022 sovereign debt crisis. This study investigates the macroeconomic drivers behind these hidden labour market shifts using a systematic data pipeline crossing the 2015--2025 period. Employing a hybrid methodological framework, this short paper presents our preliminary technical validation. We executed structural break detection (Zivot-Andrews), Autoregressive Distributed Lag (ARDL) cointegration tests, and trained non-linear tree-based machine learning regressors (XGBoost, Random Forest). Through SHapley Additive exPlanations (SHAP), we validate that underemployment is systematically driven by distinct economic shocks—primarily lagged effects of real GDP contraction and hyperinflation—proving that underemployment serves as a significantly more sensitive barometer of macro-financial health than aggregate unemployment.
+\end{abstract}
+
+\keywords{Underemployment, Sri Lanka Economic Crisis, Macroeconomics, ARDL, XGBoost, SHAP, Labour Economics}
+
+\maketitle
+
+\section{Introduction}
+
+Sri Lanka's post-independence history culminated in a severe sovereign default and economic crisis in 2022, characterized by foreign exchange depletion, acute supply chain disruptions, and inflation exceeding 70\% \cite{cbsl2025}. Paradoxically, the national aggregate unemployment rate failed to accurately capture the severity of the economic fallout on the workforce. Instead, the labour market absorbed the shock through drastic increases in underutilisation, manifesting primarily in two interconnected forms:
+\begin{itemize}
+    \item \textbf{Time-related underemployment}: Employed individuals constrained to fewer than 40 working hours per week who are willing and available to work more. This rate increased by approximately 80\% between 2019 and 2022 \cite{dcs2025}.
+    \item \textbf{Qualification-based underemployment}: Workers structurally forced into roles that fail to utilise their educational attainment or professional competencies, driven heavily by graduate labour market mismatches.
+\end{itemize}
+
+Despite its critical importance as the primary driver of suppressed wage growth in post-recession economies \cite{bell2018underemployment}, underemployment remains virtually absent from the country's labour economics literature, which has historically focused exclusively on total unemployment \cite{pabasara2025impact}. This research addresses this gap by conducting a data-driven investigation into the macroeconomic indicators most strongly associated with underemployment across the pre-crisis, crisis, and recovery periods. 
+
+\section{Data and Methodology}
+
+Our study employs a robust macro-financial dataset spanning 2015 Q1 to 2025 Q3 ($n=43$ quarters), integrating primary labour micro-data with macro-level indicators.
+
+\subsection{Data Collection and Aggregation}
+The primary target variables—the time-related and qualification-based underemployment rates—are derived via custom extraction pipelines parsing the Department of Census and Statistics (DCS) Quarterly Labour Force Survey micro-data. Missing values, particularly during the COVID-19 and 2022 crisis disruptions, are addressed utilizing K-Nearest Neighbors (KNN) imputation for isolated gaps and Multiple Imputation by Chained Equations (MICE) for block gaps. 
+
+Simultaneously, we construct a feature space of independent macroeconomic indicators including Real GDP Growth Rate, Services Sector Employment Share, Youth Labour Force Participation Rate (LFPR), and Inflation metrics. These are sourced and cross-validated from the Central Bank of Sri Lanka (CBSL) and World Bank DataBank.
+
+\subsection{Econometric Pipeline}
+To capture both short-term shocks and long-run equilibria, the econometric phase initiates with rigorous stationarity testing using Augmented Dickey-Fuller (ADF) and Kwiatkowski-Phillips-Schmidt-Shin (KPSS) tests. Because time-series analyses spanning the 2022 default are heavily subject to structural instabilities, we apply Zivot-Andrews and Bai-Perron structural break detection algorithms. 
+
+Subsequently, to establish temporal precedence, Granger causality tests accompanied by Johansen cointegration tests dictate the selection pathway between Autoregressive Distributed Lag (ARDL) modelling and Vector Error Correction Models (VECM).
+
+\subsection{Machine Learning and Interpretability}
+Econometric methods struggle with high-dimensional, non-linear feature interactions inherent in crisis economics. To overcome this, we fit advanced gradient boosting algorithms—specifically XGBoost \cite{chen2016xgboost} and baseline Random Forest regressors—to the engineered dataset. We then utilize the game-theoretic SHAP (SHapley Additive exPlanations) framework \cite{lundberg2017unified} to compute the marginal contribution of each macroeconomic indicator to the model's predictive output, ensuring strict model interpretability.
+
+\section{Preliminary Results and Technical Validation}
+
+Our executed data analysis pipelines yield robust preliminary findings that technically validate the project's hypotheses.
+
+\begin{figure*}[h]
+  \centering
+  \includegraphics[width=0.85\linewidth]{../shap_summary_plots.png}
+  \caption{SHAP Summary and Feature Importance Profiles. The scatter plot (Top Left) visualizes the directionality and magnitude of economic drivers on the predictive model, while the bar chart (Top Right) ranks overall feature importance. Residuals (Bottom Right) validate model fitting constraints.}
+  \label{fig:shap_summary}
+\end{figure*}
+
+\subsection{Structural Breaks and Interaction Dynamics}
+Exploratory Data Analysis (EDA) and Zivot-Andrews testing mathematically isolated significant structural breaks clustering strictly along the 2021/2022 crisis borders. Post-break interaction modelling via Ordinary Least Squares (OLS) regressions, utilizing an engineered 2022 Crisis Dummy, confirmed severe elasticity shifts. In simpler terms, the statistical sensitivity of the Sri Lankan labour force to shifts in GDP and inflation fundamentally altered post-default, proving that traditional, linear macroeconomic models formulated pre-2022 are no longer adequate for forecasting market slack.
+
+\subsection{Time-Lagged Dependencies and Cointegration}
+We investigated Time-Lagged Cross-Correlation (TLCC) matrices to measure the temporal friction between macroeconomic shocks and their realization in the underemployment figures. The visualizations confirmed the presence of explicit downstream delays. Shocks to Real GDP and subsequent hyperinflation waves lag by multiple quarters before forcing workers to downgrade working hours. 
+
+Moreover, early implementations of the Johansen procedure indicate underlying cointegration among the variables. While the constrained annual baseline ($n=10$) restricts asymptotic reliability, the presence of distinct shared stochastic trends validates our continued deployment of the VECM and ARDL architecture for the fully expanded quarterly dataset.
+
+\subsection{SHAP Feature Association and Model Performance}
+To extract non-linear feature importance, we evaluated baseline regressors. The Gradient Boosting baseline demonstrated a strong predictive fit with an $R^2$ Score of $>0.90$.
+
+As illustrated in \textbf{Figure \ref{fig:shap_summary}}, the SHAP analysis successfully dissects the predictive drivers of the model. 
+The generated SHAP values confirm that:
+\begin{enumerate}
+    \item \textbf{Economic Contractions:} Extreme negative shifts in Real GDP Growth act as the primary catalyst pushing workers into underemployment rather than hard unemployment, validating our hypothesis of underemployment as a shock absorber.
+    \item \textbf{Sectoral Sensitivity:} Indicators mapping the service sector distribution and youth demographic participation exhibit dense SHAP distributions, capturing the systemic inefficiencies driving the qualification-mismatch variant of underemployment.
+\end{enumerate}
+
+\section{Conclusion and Future Work}
+
+The technical validation completed thus far confirms that underemployment functions as a highly sensitive, multidimensional barometer of Sri Lanka's macroeconomic health. Overreliance on the aggregate unemployment rate masks systemic vulnerabilities. 
+As the project progresses into its final phase, our focus will shift towards:
+\begin{itemize}
+    \item Finalizing the interpolation of the full LFS quarterly vectors to circumvent small-sample constraints in the VECM.
+    \item Generating targeted SHAP waterfall visualizations specifically to map the precise economic drivers during the peak crisis quarter of 2022.
+    \item Finalizing the parallel sensitivity analysis directly comparing the SHAP rankings of time-related versus qualification-based definitions using our optimized XGBoost architecture. 
+\end{itemize}
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{references}
+
+\end{document}
