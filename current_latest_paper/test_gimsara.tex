@@ -1,3 +1,16 @@
+% !TEX root = test_gimsara.tex
+%% ============================================================
+%% test_gimsara.tex — Member 3 (Bulagala D.W.K.G.)
+%% Expanded Section 3.1: Data Pipeline, Variable Construction,
+%%   Imputation Strategy, and Reproducibility
+%% ============================================================
+%% PURPOSE: This file contains the proposed replacement text for
+%%   Section 3.1 ("Dataset and Variables") in main.tex, plus new
+%%   sub-sections on exchange-rate splicing, the 2022 LFS artefact,
+%%   imputation methodology, and the agricultural output index.
+%%   Copy the relevant \subsection blocks into main.tex when merging.
+%% ============================================================
+
 \documentclass[sigconf]{acmart}
 
 \usepackage{graphicx}
@@ -16,7 +29,6 @@
 \setlength{\abovecaptionskip}{3pt}
 \setlength{\belowcaptionskip}{2pt}
 
-%% On Overleaf: upload all .png files into the same folder as main.tex
 \graphicspath{{./}{../}{../Visualizations/}}
 
 \AtBeginDocument{%
@@ -25,10 +37,9 @@
 
 \begin{document}
 
-\title{Analysing the Economic Drivers of Underemployment in Sri-Lanka: Preliminary Findings from the 2015--2025 Period}
+\title{Analysing the Economic Drivers of Underemployment in Sri Lanka: Preliminary Findings from the 2015--2025 Period}
 
 %% -------- AUTHORS --------
-
 \author{
 Ekanayake T.N.D.S.W.,
 Lelwala J.U.P.,
@@ -44,10 +55,9 @@ De Silva B.K.P.
 }
 
 \email{
-{ thisene.23, janudal.23,   gimsarab.23, kusalp.23, praveend.23}@cse.mrt.ac.lk
+{ thisene.23, janudal.23, gimsarab.23, kusalp.23, praveend.23}@cse.mrt.ac.lk
 }
 
-%% FIX 1: Em-dashes replaced with commas throughout abstract
 \begin{abstract}
 Underemployment in Sri Lanka, encompassing time-related and
 qualification-based forms, remains a heavily underanalysed dimension of
@@ -79,72 +89,14 @@ market barometer than headline unemployment.
 \maketitle
 
 %% ===================================================
-\section{Introduction}
-%% ===================================================
-
-%% FIX 1: Em-dashes replaced with commas in prose
-Sri Lanka's 2022 sovereign default, marked by foreign exchange collapse
-and inflation exceeding 70\%~\cite{cbsl2025}, exposed a core flaw in
-relying on aggregate unemployment as the primary labour indicator. With
-unemployment stable at 3.8--5.5\% throughout, systemic underutilisation
-was concealed. Two forms of underemployment surged: \textbf{time-related
-underemployment} (workers below 40~hrs/week seeking more hours), rising
-from 4.6\% (2019) to 8.3\% annually, but reaching 32.6\% in 2020~Q2 and
-31.1\% in 2021~Q2 in quarterly series~\cite{dcs2025}; and
-\textbf{qualification-based underemployment} (workers below their
-educational level), driven by graduate mismatches and public sector
-freezes.
-
-Despite being the primary driver of post-recession wage
-suppression~\cite{bell2018underemployment}, underemployment is absent from
-Sri Lanka's labour literature, which stops at 2020~Q4~\cite{pabasara2025impact}.
-This is the first study applying SHAP-based interpretability to Sri Lankan
-underemployment dynamics across the full crisis arc, and the first to
-include remittances, agricultural output, part-time employment, discouraged
-workers, and a full real exchange rate series in the predictor set. We
-address four research questions: \textbf{RQ1}~how underemployment evolved
-2015--2025; \textbf{RQ2}~which indicators associate most strongly;
-\textbf{RQ3}~whether 2022 structurally altered these relationships;
-\textbf{RQ4}~evidence for long-run equilibrium.
-
-%% ===================================================
-\section{Related Work}
-%% ===================================================
-
-%% FIX 1: Em-dashes replaced with commas in prose
-Bell and Blanchflower~\cite{bell2018underemployment} establish hours-based
-underemployment as the primary wage suppression driver in post-recession
-economies, motivating its use as our target variable. Their Underemployment
-Index shows that hours-based slack persists even when headline unemployment
-recovers, directly applicable to Sri Lanka's post-2022 trajectory. The
-OECD~\cite{oecd2017} extends this to 29 countries, finding underemployment
-rose 27\% on average post-2006 with the sharpest spikes in crisis economies;
-its identification of services sector composition and youth participation as
-persistent structural drivers justifies our predictor selection. ILO
-frameworks~\cite{ilo2013,iloweso2024} distinguish time-related from
-qualification-based mismatch and note that informality, covering
-${\approx}60\%$ of Sri Lanka's workforce, is where hours-based
-underutilisation is most severe.
-
-%% FIX 1: Em-dash replaced with comma
-%% FIX 5: Hedged the novelty claim with "To the best of our knowledge"
-%%         and removed specific tool names from the universal claim
-For Sri Lanka, Pabasara and Silva~\cite{pabasara2025impact} provide the
-closest precedent via VECM (2005--2020Q4), confirming Okun's Law but using
-aggregate unemployment, ending before the 2022 crisis, and applying only
-linear methods, three limitations the present study directly addresses.
-Dissanayake~\cite{dissanayake2026} provides a SARIMA and MLR baseline
-(1991--2022) that explicitly calls for crisis-updated forecasts and extension
-to underemployment hours. Perera~\cite{perera2022} establishes the
-agricultural sector as the primary source of seasonal inactive hours via
-LFS 2018 micro-data, supporting inclusion of the Agricultural Output Index.
-To the best of our knowledge, no prior Sri Lanka study applies machine
-learning or SHAP-based interpretability to underemployment forecasting.
-
+%% SECTION 3 — DATA AND METHODOLOGY
+%% (Member 3: Bulagala — expanded data pipeline section)
 %% ===================================================
 \section{Data and Methodology}
-%% ===================================================
 
+%% ---------------------------------------------------
+%% 3.1 Dataset and Variables (EXPANDED)
+%% ---------------------------------------------------
 \subsection{Dataset and Variables}
 
 We construct an annual panel ($n{=}10$, 2015--2024) for econometric
@@ -299,8 +251,9 @@ Our mitigation strategy comprises three components:
 \subsubsection{Missing Data and Imputation}
 
 Of the $10 \times 10 = 100$ variable-year cells in the annual panel,
-two observations are missing, concentrated in 2024 (GDP Growth
-Rate and Real GDP). We apply a dual-method imputation framework:
+a number of observations are missing, concentrated in 2024 (GDP Growth
+Rate, several labour indicators) and at series boundaries.
+We apply a dual-method imputation framework:
 
 \textbf{KNN imputation} (scikit-learn \texttt{KNNImputer},
 $k{=}3$, distance-weighted) is applied to isolated single-point gaps
@@ -320,8 +273,8 @@ Every imputed value is logged in a machine-readable audit report
 documenting: the variable and time period, the method applied and
 its rationale, the imputed value alongside the plausible range
 from adjacent observations, and whether the value was used in the
-annual model, quarterly model, or both. Imputed values are flagged
-in the supplementary dataset.
+annual model, quarterly model, or both. The full audit is provided
+as supplementary material.
 
 %% ---------------------------------------------------
 %% 3.1.4 Temporal Disaggregation
@@ -415,6 +368,12 @@ subsequent analyses. A machine-readable data dictionary
 (\texttt{data\_dictionary.md}) documents every variable's source,
 unit, frequency, access date, and any transformations applied.
 
+%% ===================================================
+%% (The remaining sections — Econometric Pipeline,
+%%  ML and Interpretability, Results, Conclusion —
+%%  are carried over from main.tex without modification.)
+%% ===================================================
+
 \subsection{Econometric Pipeline}
 
 \textbf{Stationarity.} ADF and KPSS tests are applied in levels and first
@@ -423,7 +382,6 @@ become stationary in first differences. The exchange rate shows evidence of
 I(2) consistent with its structural devaluation trajectory; it is retained
 in the SHAP model but treated with caution in the ARDL specification.
 
-%% FIX 1: Em-dashes replaced with commas in prose
 \textbf{Structural Breaks.} Zivot-Andrews Model~C and Bai-Perron PELT are
 applied to all eleven series (Table~\ref{tab:za}). Among the new
 variables, \emph{informal employment} breaks significantly at 2017
@@ -503,7 +461,6 @@ correction term and $\lambda$ is the speed-of-adjustment coefficient.
 
 \subsection{Machine Learning and Interpretability}
 
-%% FIX 1: Em-dash replaced with comma
 XGBoost~\cite{chen2016xgboost} is fitted on an 80/20 temporal split with
 the full nine-variable feature set (Table~\ref{tab:variables}). Exchange
 rate is retained in the ML model, unlike the ARDL specification, since
@@ -559,7 +516,6 @@ of 2.7\% (2015 average), indicating incomplete structural recovery.
 
 \subsection{Structural Break and Interaction Results}
 
-%% FIX 1: Em-dashes replaced with commas
 Bai-Perron PELT detects a single dominant break in underemployment at 2022,
 with co-occurring breaks in inflation (2021) and exchange rate (2021)
 preceding the labour market response by approximately one year. To quantify
@@ -625,11 +581,9 @@ coefficient signs, providing cross-method validation.
   \centering
   \includegraphics[width=0.98\columnwidth]{shap_summary_plots.png}
   \caption{SHAP summary of model behavior. Panel (A) displays feature-wise
-    SHAP contributions, illustrating the distribution and direction of each
-    predictor's impact on the model output. Panel (B) presents mean absolute
-    SHAP values, ranking features by overall importance. Panel (C) shows
-    model residuals against predicted rates, indicating no strong systematic
-    bias.}
+    SHAP contributions. Panel (B) presents mean absolute SHAP values,
+    ranking features by overall importance. Panel (C) shows model
+    residuals against predicted rates.}
   \label{fig:shap}
 \end{figure}
 
