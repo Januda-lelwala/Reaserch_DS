@@ -107,39 +107,95 @@ address four research questions: \textbf{RQ1}~how underemployment evolved
 \textbf{RQ3}~whether 2022 structurally altered these relationships;
 \textbf{RQ4}~evidence for long-run equilibrium.
 
+To the best of our knowledge, this study represents the first effort
+to: (1) apply SHAP-based machine learning interpretability to Sri Lankan
+underemployment dynamics across the complete 2015--2025 crisis arc;
+(2) simultaneously incorporate remittances, agricultural output, part-time
+employment, and discouraged workers as predictors; (3) conduct
+gender-disaggregated SHAP analysis revealing persistent female
+underemployment gaps; and (4) test structural breaks across 11
+macroeconomic and labour market series using complementary Zivot-Andrews
+and Bai-Perron PELT methodologies. These advances directly address the
+three limitations of Pabasara and Silva~\cite{pabasara2025impact}: their
+exclusive focus on aggregate unemployment rather than underemployment,
+termination of analysis at 2020~Q4 before the sovereign default, and
+reliance on linear VECM specifications ill-suited to crisis-induced
+nonlinearities.
+
 %% ===================================================
 \section{Related Work}
 %% ===================================================
 
-%% FIX 1: Em-dashes replaced with commas in prose
-Bell and Blanchflower~\cite{bell2018underemployment} establish hours-based
-underemployment as the primary wage suppression driver in post-recession
-economies, motivating its use as our target variable. Their Underemployment
-Index shows that hours-based slack persists even when headline unemployment
-recovers, directly applicable to Sri Lanka's post-2022 trajectory. The
-OECD~\cite{oecd2017} extends this to 29 countries, finding underemployment
-rose 27\% on average post-2006 with the sharpest spikes in crisis economies;
-its identification of services sector composition and youth participation as
-persistent structural drivers justifies our predictor selection. ILO
-frameworks~\cite{ilo2013,iloweso2024} distinguish time-related from
-qualification-based mismatch and note that informality, covering
-${\approx}60\%$ of Sri Lanka's workforce, is where hours-based
-underutilisation is most severe.
-
-%% FIX 1: Em-dash replaced with comma
-%% FIX 5: Hedged the novelty claim with "To the best of our knowledge"
-%%         and removed specific tool names from the universal claim
+\subsection{Underemployment Theory and Measurement}
+ 
+Underemployment matters distinctly from unemployment because it captures
+hours-based slack and skills mismatch that persist post-recovery,
+suppressing wages even as headline rates normalise~\cite{bell2018underemployment,ilo2013}.
+Bell and Blanchflower~\cite{bell2018underemployment} develop an
+Underemployment Index demonstrating this dynamic in the US and Europe,
+where hours deficits linger long after unemployment recovers---directly
+mirroring Sri Lanka's 3.8\% unemployment in 2023 amid persistently
+elevated underemployment. The ILO 19th ICLS Resolution~\cite{ilo2013}
+formalises the distinction between time-related underemployment (insufficient
+hours) and qualification-based mismatch (skills-occupation gap), establishing
+both as necessary components of a complete labour underutilisation account,
+particularly in high-informality economies. Haider~\cite{haider2001} links
+underemployment spells to long-term earnings instability even after
+re-employment, while Autor~\cite{autor2014} connects qualification mismatch
+to structural labour market polarisation---a mechanism directly relevant to
+Sri Lanka's growing graduate overhang in a narrowing formal sector.
+ 
+\subsection{Underemployment in Developing and Crisis Economies}
+ 
+In crisis-hit economies, underemployment rises persistently due to structural
+shifts in services-sector composition and youth labour force
+entry~\cite{oecd2017}. The OECD~\cite{oecd2017} documents a 27\% average
+increase across 29 countries post-2006, with the sharpest and most durable
+spikes in economies undergoing fiscal consolidation; Sri Lanka aligns with
+this pattern through its high youth and informal sector exposure. Flek and
+Mysikova~\cite{flek2015} show that low-skilled workers in Central European
+post-crisis economies cycle repeatedly through underemployment rather than
+recovering to full employment---a hysteresis dynamic consistent with Sri
+Lanka's sustained post-2022 underemployment elevation. Regionally,
+Chowdhury~\cite{chowdhury2009} provides the most relevant survey,
+documenting underemployment determinants across Bangladesh, India, Indonesia,
+and Thailand and attributing persistence to weak aggregate demand and
+informality, providing the regional baseline absent from Sri Lankan
+studies. Islam and Verick~\cite{islam2011} analyse labour market recovery
+following sovereign debt crises, identifying delayed transmission of fiscal
+contractions into hours-based slack---consistent with our 2--3 quarter TLCC
+lags. Unlike Greece's 2010 sovereign debt crisis---where underemployment
+exhibited five-year hysteresis with only partial mean
+reversion~\cite{oecd2017}---Sri Lanka's post-2022 trajectory shows recovery
+capacity while remaining structurally elevated above pre-crisis baselines.
+ 
+\subsection{Sri Lankan Labour Market Context}
+ 
 For Sri Lanka, Pabasara and Silva~\cite{pabasara2025impact} provide the
-closest precedent via VECM (2005--2020Q4), confirming Okun's Law but using
-aggregate unemployment, ending before the 2022 crisis, and applying only
-linear methods, three limitations the present study directly addresses.
+closest precedent via VECM (2005--2020~Q4), confirming Okun's Law on
+aggregate unemployment but using headline unemployment as the dependent
+variable, terminating before the 2022 crisis, and applying only linear
+methods---three limitations the present study directly addresses.
 Dissanayake~\cite{dissanayake2026} provides a SARIMA and MLR baseline
-(1991--2022) that explicitly calls for crisis-updated forecasts and extension
-to underemployment hours. Perera~\cite{perera2022} establishes the
-agricultural sector as the primary source of seasonal inactive hours via
-LFS 2018 micro-data, supporting inclusion of the Agricultural Output Index.
+(1991--2022) that explicitly calls for crisis-updated forecasts and
+extension to underemployment hours, directly motivating this work.
+Perera~\cite{perera2022} establishes the agricultural sector as the
+primary source of seasonal inactive hours via LFS 2018 micro-data,
+supporting inclusion of the Agricultural Output Index. The Central Bank
+of Sri Lanka Annual Report~\cite{cbsl2025} documents the 2022 crisis's
+labour market disruptions, providing official context against which our
+structural break findings can be benchmarked; our empirical identification
+of breaks at 2021--2022 confirms and quantifies the CBSL's qualitative
+narrative. The ILO World Employment and Social Outlook~\cite{iloweso2024}
+further contextualises these findings within global post-COVID labour
+market dynamics.
+ 
 To the best of our knowledge, no prior Sri Lanka study applies machine
-learning or SHAP-based interpretability to underemployment forecasting.
+learning or SHAP-based interpretability to underemployment forecasting,
+spans the complete 2015--2025 crisis arc, simultaneously models remittances,
+agricultural output, part-time employment, and discouraged workers, conducts
+gender-disaggregated SHAP analysis, or tests structural breaks across
+11 series using both Zivot-Andrews and Bai-Perron PELT methodologies.
 
 %% ===================================================
 \section{Data and Methodology}
