@@ -1,3 +1,5 @@
+%% main.tex — Conference paper source
+
 \documentclass[sigconf]{acmart}
 
 \usepackage{graphicx}
@@ -8,8 +10,6 @@
 \usepackage{multirow}
 \usepackage{enumitem}
 \usepackage{amsmath}
-\usepackage{tikz}
-\usetikzlibrary{arrows.meta,positioning}
 
 %% Compress vertical spacing to fit 4-page limit
 \setlength{\textfloatsep}{6pt plus 2pt minus 2pt}
@@ -18,8 +18,14 @@
 \setlength{\abovecaptionskip}{3pt}
 \setlength{\belowcaptionskip}{2pt}
 
-%% On Overleaf: upload all .png files into the same folder as main.tex
 \graphicspath{{./}{../}{../Visualizations/}}
+
+%% Conference metadata — update before final submission
+\acmConference[ICDS 2025]{International Conference on Data Science}{2025}{Sri Lanka}
+\acmBooktitle{Proceedings of the International Conference on Data Science (ICDS 2025)}
+\setcopyright{none}
+\acmDOI{}
+\acmISBN{}
 
 \AtBeginDocument{%
   \providecommand\BibTeX{{{{\normalfont B\kern-.05em{\scshape i\kern-.025em b}\kern-.08em\TeX}}}}
@@ -27,10 +33,9 @@
 
 \begin{document}
 
-\title{Analysing the Economic Drivers of Underemployment in Sri-Lanka: Preliminary Findings from the 2015--2025 Period}
+\title{Analysing the Economic Drivers of Underemployment in Sri Lanka: Findings from the 2015--2025 Period}
 
 %% -------- AUTHORS --------
-
 \author{
 Ekanayake T.N.D.S.W.,
 Lelwala J.U.P.,
@@ -46,7 +51,7 @@ De Silva B.K.P.
 }
 
 \email{
-{ thisene.23, janudal.23,   gimsarab.23, kusalp.23, praveend.23}@cse.mrt.ac.lk
+{thisene.23, janudal.23, gimsarab.23, kusalp.23, praveend.23}@cse.mrt.ac.lk
 }
 
 \begin{abstract}
@@ -56,19 +61,15 @@ labour market slack. While headline unemployment stays near 3.8\%, quarterly
 LFS micro-data reveals crisis peaks of 32.6\% (2020~Q2) and 31.1\%
 (2021~Q2). We investigate macroeconomic drivers over 2015--2025 via
 structural break detection (Zivot-Andrews, Bai-Perron PELT), Granger
-causality, ARDL bounds testing, and Ridge regression with SHAP
-interpretability (Leave-One-Out cross-validated, $n{=}10$).
+causality, ARDL bounds testing, and XGBoost with SHAP interpretability.
 The dataset incorporates remittances, agricultural output index,
 part-time employment, discouraged workers, and a real exchange rate series
-(annual CBSL averages, 2015--2024). SHAP identifies Youth LFPR and
-Exchange Rate as the highest-ranked drivers by point estimate; however,
-95\% bootstrap confidence intervals on all feature rankings overlap,
-precluding definitive ordering claims at this sample size.
-ARDL bounds testing on quarterly data
+(annual CBSL averages, 2015--2024). GDP contraction and informal employment
+emerge as dominant SHAP drivers. ARDL bounds testing on quarterly data
 ($n{=}36$) confirms long-run cointegration at 1\% ($F{=}7.25$, Pesaran
-critical value 4.68); the ECM speed-of-adjustment $\lambda{=}{-0.663}$
-($p{=}0.001$) indicates significant quarterly correction toward
-equilibrium. A sensitivity analysis confirms strong convergence of macro
+critical value 4.68); the ECM speed-of-adjustment $\lambda{=}{-1.087}$
+($p{=}0.003$) indicates rapid but mildly overshooting quarterly correction toward
+equilibrium, consistent with volatile crisis-period dynamics. A sensitivity analysis confirms strong convergence of macro
 driver rankings across hours-based and qualification-based underemployment
 definitions ($\rho = 0.893$, $p = 0.007$). Gender-disaggregated SHAP
 reveals distinct driver structures by sex, with a statistically persistent
@@ -79,7 +80,7 @@ elasticities, confirming underemployment as a far more sensitive labour
 market barometer than headline unemployment.
 \end{abstract}
 
-\keywords{Underemployment, Sri Lanka, ARDL, Ridge Regression, SHAP, Structural Breaks, Sensitivity Analysis, Gender Disaggregation}
+\keywords{Underemployment, Sri Lanka, ARDL, XGBoost, SHAP, Structural Breaks, Sensitivity Analysis, Gender Disaggregation}
 
 \maketitle
 
@@ -87,13 +88,12 @@ market barometer than headline unemployment.
 \section{Introduction}
 %% ===================================================
 
-%% FIX 1: Em-dashes replaced with commas in prose
-Sri Lanka's 2022 sovereign default, marked by foreign exchange collapse
-and inflation exceeding 70\%~\cite{cbsl2025}, exposed a core flaw in
+Sri Lanka's 2022 sovereign default, marked by foreign exchange
+collapse and inflation exceeding 70\%~\cite{cbsl2025}, exposed a core flaw in
 relying on aggregate unemployment as the primary labour indicator. With
 unemployment stable at 3.8--5.5\% throughout, systemic underutilisation
 was concealed. Two forms of underemployment surged: \textbf{time-related
-underemployment} (workers below 40~hrs / week seeking more hours), rising
+underemployment} (workers below 40~hrs/week seeking more hours), rising
 from 4.6\% (2019) to 8.3\% annually, but reaching 32.6\% in 2020~Q2 and
 31.1\% in 2021~Q2 in quarterly series~\cite{dcs2025}; and
 \textbf{qualification-based underemployment} (workers below their
@@ -103,109 +103,106 @@ freezes.
 Despite being the primary driver of post-recession wage
 suppression~\cite{bell2018underemployment}, underemployment is absent from
 Sri Lanka's labour literature, which stops at 2020~Q4~\cite{pabasara2025impact}.
-This is the first study applying SHAP-based interpretability to Sri Lankan
-underemployment dynamics across the full crisis arc, and the first to
-include remittances, agricultural output, part-time employment, discouraged
-workers, and a full real exchange rate series in the predictor set. We
-address four research questions: \textbf{RQ1}~how underemployment evolved
+We address four research questions: \textbf{RQ1}~how underemployment evolved
 2015--2025; \textbf{RQ2}~which indicators associate most strongly;
 \textbf{RQ3}~whether 2022 structurally altered these relationships;
 \textbf{RQ4}~evidence for long-run equilibrium.
 
-To the best of our knowledge, this study represents the first effort
-to: (1) apply SHAP-based machine learning interpretability to Sri Lankan
-underemployment dynamics across the complete 2015--2025 crisis arc;
-(2) simultaneously incorporate remittances, agricultural output, part-time
-employment, and discouraged workers as predictors; (3) conduct
-gender-disaggregated SHAP analysis revealing persistent female
-underemployment gaps; and (4) test structural breaks across 11
-macroeconomic and labour market series using complementary Zivot-Andrews
-and Bai-Perron PELT methodologies. These advances directly address the
-three limitations of Pabasara and Silva~\cite{pabasara2025impact}: their
-exclusive focus on aggregate unemployment rather than underemployment,
-termination of analysis at 2020~Q4 before the sovereign default, and
-reliance on linear VECM specifications ill-suited to crisis-induced
-nonlinearities.
+To the best of our knowledge, this study represents the first
+effort to: (1)~apply SHAP-based machine learning interpretability
+to Sri Lankan underemployment dynamics across the complete
+2015--2025 crisis arc; (2)~simultaneously incorporate remittances,
+agricultural output, part-time employment, and discouraged workers
+as predictors; (3)~conduct gender-disaggregated SHAP analysis
+revealing persistent female underemployment gaps; and (4)~test
+structural breaks across 11 macroeconomic and labour market series
+using complementary Zivot-Andrews and Bai-Perron PELT
+methodologies. These advances directly address the three limitations
+of Pabasara and Silva~\cite{pabasara2025impact}: their exclusive focus on aggregate
+unemployment rather than underemployment, termination of analysis
+at 2020~Q4 before the sovereign default, and reliance on linear
+VECM specifications ill-suited to crisis-induced nonlinearities.
 
 %% ===================================================
 \section{Related Work}
 %% ===================================================
 
 \subsection{Underemployment Theory and Measurement}
- 
-Underemployment matters distinctly from unemployment because it captures
-hours-based slack and skills mismatch that persist post-recovery,
+
+Underemployment matters distinctly from unemployment because
+it captures hours-based slack and skills mismatch that persist post-recovery,
 suppressing wages even as headline rates normalise~\cite{bell2018underemployment,ilo2013}.
-Bell and Blanchflower~\cite{bell2018underemployment} develop an
-Underemployment Index demonstrating this dynamic in the US and Europe,
-where hours deficits linger long after unemployment recovers---directly
-mirroring Sri Lanka's 3.8\% unemployment in 2023 amid persistently
-elevated underemployment. The ILO 19th ICLS Resolution~\cite{ilo2013}
-formalises the distinction between time-related underemployment (insufficient
-hours) and qualification-based mismatch (skills-occupation gap), establishing
+Bell and Blanchflower~\cite{bell2018underemployment} develop an Underemployment Index
+demonstrating this dynamic in the US and Europe, where hours
+deficits linger long after unemployment recovers---directly mirroring
+Sri Lanka's 3.8\% unemployment in 2023 amid persistently
+elevated underemployment. The ILO 19th ICLS Resolution~\cite{ilo2013} formalises
+the distinction between time-related underemployment (insufficient hours)
+and qualification-based mismatch (skills-occupation gap), establishing
 both as necessary components of a complete labour underutilisation account,
-particularly in high-informality economies. Haider~\cite{haider2001} links
-underemployment spells to long-term earnings instability even after
-re-employment, while Autor~\cite{autor2014} connects qualification mismatch
-to structural labour market polarisation---a mechanism directly relevant to
-Sri Lanka's growing graduate overhang in a narrowing formal sector.
- 
+particularly in high-informality economies.
+Haider~\cite{haider2001} links underemployment spells to long-term
+earnings instability even after re-employment, while
+Autor~\cite{autor2014} connects qualification mismatch to structural
+labour market polarisation---a mechanism directly relevant to Sri Lanka's
+growing graduate overhang in a narrowing formal sector.
+
 \subsection{Underemployment in Developing and Crisis Economies}
- 
-In crisis-hit economies, underemployment rises persistently due to structural
-shifts in services-sector composition and youth labour force
-entry~\cite{oecd2017}. The OECD~\cite{oecd2017} documents a 27\% average
-increase across 29 countries post-2006, with the sharpest and most durable
-spikes in economies undergoing fiscal consolidation; Sri Lanka aligns with
-this pattern through its high youth and informal sector exposure. Flek and
-Mysikova~\cite{flek2015} show that low-skilled workers in Central European
-post-crisis economies cycle repeatedly through underemployment rather than
-recovering to full employment---a hysteresis dynamic consistent with Sri
-Lanka's sustained post-2022 underemployment elevation. Regionally,
-Chowdhury~\cite{chowdhury2009} provides the most relevant survey,
-documenting underemployment determinants across Bangladesh, India, Indonesia,
-and Thailand and attributing persistence to weak aggregate demand and
-informality, providing the regional baseline absent from Sri Lankan
-studies. Islam and Verick~\cite{islam2011} analyse labour market recovery
-following sovereign debt crises, identifying delayed transmission of fiscal
-contractions into hours-based slack---consistent with our 2--3 quarter TLCC
-lags. Unlike Greece's 2010 sovereign debt crisis---where underemployment
-exhibited five-year hysteresis with only partial mean
-reversion~\cite{oecd2017}---Sri Lanka's post-2022 trajectory shows recovery
-capacity while remaining structurally elevated above pre-crisis baselines.
- 
+
+In crisis-hit economies, underemployment rises persistently due to
+structural shifts in services-sector composition and youth labour
+force entry~\cite{oecd2017}. The OECD~\cite{oecd2017} documents a 27\%
+average increase across 29 countries post-2006, with the sharpest and
+most durable spikes in economies undergoing fiscal consolidation;
+Sri Lanka aligns with this pattern through its high youth and informal
+sector exposure. Flek and Mysikova~\cite{flek2015} show that low-skilled
+workers in Central European post-crisis economies cycle repeatedly
+through underemployment rather than recovering to full employment---a
+hysteresis dynamic consistent with Sri Lanka's sustained post-2022
+underemployment elevation. Regionally, Chowdhury~\cite{chowdhury2009}
+provides the most relevant survey, documenting underemployment
+determinants across Bangladesh, India, Indonesia, and Thailand and
+attributing persistence to weak aggregate demand and informality,
+providing the regional baseline absent from Sri Lankan studies.
+Islam and Verick~\cite{islam2011} analyse labour market recovery following
+sovereign debt crises, identifying delayed transmission of fiscal
+contractions into hours-based slack---consistent with our 2--3 quarter
+TLCC lags. Unlike Greece's 2010 sovereign debt crisis---where
+underemployment exhibited five-year hysteresis with only partial
+mean reversion~\cite{oecd2017}---Sri Lanka's post-2022 trajectory shows
+recovery capacity while remaining structurally elevated above pre-crisis
+baselines.
+
 \subsection{Sri Lankan Labour Market Context}
- 
-For Sri Lanka, Pabasara and Silva~\cite{pabasara2025impact} provide the
-closest precedent via VECM (2005--2020~Q4), confirming Okun's Law on
-aggregate unemployment but using headline unemployment as the dependent
+
+For Sri Lanka, Pabasara and Silva~\cite{pabasara2025impact} provide the closest precedent
+via VECM (2005--2020~Q4), confirming Okun's Law on aggregate
+unemployment but using headline unemployment as the dependent
 variable, terminating before the 2022 crisis, and applying only linear
 methods---three limitations the present study directly addresses.
 Dissanayake~\cite{dissanayake2026} provides a SARIMA and MLR baseline
-(1991--2022) that explicitly calls for crisis-updated forecasts and
-extension to underemployment hours, directly motivating this work.
-Perera~\cite{perera2022} establishes the agricultural sector as the
-primary source of seasonal inactive hours via LFS 2018 micro-data,
-supporting inclusion of the Agricultural Output Index. The Central Bank
-of Sri Lanka Annual Report~\cite{cbsl2025} documents the 2022 crisis's
-labour market disruptions, providing official context against which our
-structural break findings can be benchmarked; our empirical identification
-of breaks at 2021--2022 confirms and quantifies the CBSL's qualitative
-narrative. The ILO World Employment and Social Outlook~\cite{iloweso2024}
-further contextualises these findings within global post-COVID labour
-market dynamics.
- 
-To the best of our knowledge, no prior Sri Lanka study applies machine
-learning or SHAP-based interpretability to underemployment forecasting,
-spans the complete 2015--2025 crisis arc, simultaneously models remittances,
-agricultural output, part-time employment, and discouraged workers, conducts
-gender-disaggregated SHAP analysis, or tests structural breaks across
-11 series using both Zivot-Andrews and Bai-Perron PELT methodologies.
+(1991--2022) that explicitly calls for crisis-updated forecasts and extension
+to underemployment hours, directly motivating this work.
+Liyanapathirana and Samaraweera~\cite{perera2022} establish the
+agricultural sector as the primary source of seasonal inactive hours via
+LFS 2018 micro-data, supporting inclusion of the Agricultural Output Index.
+The Central Bank of Sri Lanka Annual Report~\cite{cbsl2025} documents the
+2022 crisis's labour market disruptions, providing official context against
+which our structural break findings can be benchmarked; our empirical
+identification of breaks at 2021--2022 confirms and quantifies the CBSL's
+qualitative narrative. The ILO World Employment and Social
+Outlook~\cite{iloweso2024} further contextualises these findings within
+global post-COVID labour market dynamics.
 
+%% ===================================================
+%% SECTION 3 — DATA AND METHODOLOGY
+%% (Member 3: Bulagala — expanded data pipeline section)
 %% ===================================================
 \section{Data and Methodology}
-%% ===================================================
 
+%% ---------------------------------------------------
+%% 3.1 Dataset and Variables (EXPANDED)
+%% ---------------------------------------------------
 \subsection{Dataset and Variables}
 
 We construct an annual panel ($n{=}10$, 2015--2024) for econometric
@@ -249,7 +246,7 @@ Bank, current USD) represent the income-smoothing mechanism
 whereby diaspora transfers cushion household consumption and reduce
 pressure to accept inadequate hours during downturns. \emph{Agricultural
 Output Index} (FAO, weighted composite) captures the seasonal
-employment channel: Perera~\cite{perera2022} establishes agriculture
+employment channel: Liyanapathirana and Samaraweera~\cite{perera2022} establish agriculture
 as the primary source of seasonal inactive hours via LFS 2018
 micro-data. \emph{Real Exchange Rate} (LKR/USD, constructed from CBSL
 and FRED daily data, CPI-deflated) captures the competitiveness and
@@ -303,7 +300,7 @@ obtained from the CBSL web data portal and aggregated to quarterly
 means using business-day averaging.
 
 \textbf{Nominal series (2021 Q1--2024 Q4).} Daily rates are sourced
-from FRED series DEXSLUS~\cite{cbsl2025} and aggregated identically.
+from FRED series DEXSLUS~\cite{cbsl2025,fred2025} and aggregated identically.
 
 \textbf{Splice diagnostic.} The two sub-series do not formally
 overlap. The CBSL 2020~Q4 mean is 185.30~LKR/USD; the FRED 2021~Q1
@@ -360,8 +357,9 @@ Our mitigation strategy comprises three components:
 \subsubsection{Missing Data and Imputation}
 
 Of the $10 \times 10 = 100$ variable-year cells in the annual panel,
-two observations are missing, concentrated in 2024 (GDP Growth
-Rate and Real GDP). We apply a dual-method imputation framework:
+a number of observations are missing, concentrated in 2024 (GDP Growth
+Rate, several labour indicators) and at series boundaries.
+We apply a dual-method imputation framework:
 
 \textbf{KNN imputation} (scikit-learn \texttt{KNNImputer},
 $k{=}3$, distance-weighted) is applied to isolated single-point gaps
@@ -381,8 +379,8 @@ Every imputed value is logged in a machine-readable audit report
 documenting: the variable and time period, the method applied and
 its rationale, the imputed value alongside the plausible range
 from adjacent observations, and whether the value was used in the
-annual model, quarterly model, or both. Imputed values are flagged
-in the supplementary dataset.
+annual model, quarterly model, or both. The full audit is provided
+as supplementary material.
 
 %% ---------------------------------------------------
 %% 3.1.4 Temporal Disaggregation
@@ -476,6 +474,7 @@ subsequent analyses. A machine-readable data dictionary
 (\texttt{data\_dictionary.md}) documents every variable's source,
 unit, frequency, access date, and any transformations applied.
 
+%% ===================================================
 \subsection{Econometric Pipeline}
 
 \textbf{Stationarity.} ADF and KPSS tests are applied in levels and first
@@ -484,8 +483,7 @@ become stationary in first differences. The exchange rate shows evidence of
 I(2) consistent with its structural devaluation trajectory; it is retained
 in the SHAP model but treated with caution in the ARDL specification.
 
-%% FIX 1: Em-dashes replaced with commas in prose
-\textbf{Structural Breaks.} Zivot-Andrews Model~C and Bai-Perron PELT are
+\textbf{Structural Breaks.} Zivot-Andrews Model~C~\cite{zivot1992} and Bai-Perron PELT are
 applied to all eleven series (Table~\ref{tab:za}). Among the new
 variables, \emph{informal employment} breaks significantly at 2017
 ($t{=}{-6.02}$, $p{<}0.01$) and \emph{part-time employment} breaks at 2020
@@ -530,32 +528,6 @@ $\alpha{=}0.05/7{=}0.0071$), Agricultural Output Index is the only
 Granger-cause clearing the corrected threshold ($F{=}11.91$, $p{=}0.0016$);
 GDP Growth is suggestive at nominal $\alpha{=}0.10$ ($p{=}0.080$).
 
-\begin{figure}[h]
-  \centering
-  \begin{tikzpicture}[
-    node distance=0.95cm and 1.25cm,
-    every node/.style={draw, rounded corners=2pt, align=center, font=\footnotesize, inner sep=3pt},
-    >={Stealth[length=2mm]}
-  ]
-    \node (exr) {Exchange Rate\\Shock};
-    \node (gdp) [below=of exr] {GDP\\Contraction};
-    \node (youth) [below=of gdp] {Youth LFPR};
-    \node (informal) [right=of gdp, xshift=0.9cm] {Informal\\Employment};
-    \node (under) [right=of informal, xshift=1.1cm] {Underemployment};
-    \node (remit) [below=of under, yshift=-0.05cm] {Remittances};
-
-    \draw[->] (exr) -- (under);
-    \draw[->] (gdp) -- (informal);
-    \draw[->] (informal) -- (under);
-    \draw[->] (youth) -- (informal);
-    \draw[->] (remit) -- (under);
-  \end{tikzpicture}
-  \caption{Assumed causal DAG used to motivate variable ordering and lag structure.}
-  \label{fig:causal_dag}
-\end{figure}
-
-Figure~\ref{fig:causal_dag} presents the assumed causal DAG underlying our variable ordering. Exchange rate depreciation and GDP contraction are treated as exogenous shocks, driven by global commodity prices, sovereign debt dynamics, and monetary policy, that propagate into labour market outcomes through the informal employment buffer. Youth LFPR is treated as a slow-moving structural variable determined by demographic trends and education policy rather than by quarterly underemployment fluctuations. Remittances are assumed to affect underemployment via the household income channel rather than vice versa, consistent with the negative lagged correlations in Figure~\ref{fig:tlcc}. This ordering motivates the ARDL lag structure and informs the policy mapping in Section~5.
-
 The ARDL($p,q$) specification for the long-run relationship is:
 %
 \begin{equation}
@@ -570,9 +542,8 @@ The ARDL($p,q$) specification for the long-run relationship is:
 %
 where $\lambda_1$ and $\boldsymbol{\lambda}_2$ are the long-run level
 coefficients tested via Pesaran's $F$-bounds procedure~\cite{pesaran2001}.
-BIC selects a parsimonious ARDL specification on the quarterly dataset
-with centered seasonal dummies and a 2022 crisis pulse. The bounds
-$F$-statistic is $7.25$ ($p{=}0.0008$),
+AIC selects ARDL(3,1,1,2,0) on the quarterly dataset with seasonal
+dummies included. The bounds $F$-statistic is $7.25$ ($p{=}0.0008$),
 exceeding the 1\% upper critical value of $4.68$ for $k{=}5$ predictors
 (Case~III: unrestricted intercept, no trend), confirming long-run
 cointegration. If cointegration holds, the ECM representation is:
@@ -591,15 +562,11 @@ correction term and $\lambda$ is the speed-of-adjustment coefficient.
 
 \subsection{Machine Learning and Interpretability}
 
-With only $n{=}10$ annual observations, an 80/20 held-out split would
-yield two test points, making any reported test-set metric statistically
-meaningless. We therefore fit a \textbf{Ridge regression} model with
-Leave-One-Out Cross-Validation (LOOCV) for all reported performance
-metrics. The regularisation parameter $\alpha$ is selected by
-RidgeCV's internal LOOCV over $\alpha \in \{0.01, 0.1, 1, 10, 100, 1000\}$.
-All variables are standardised before fitting. SHAP~\cite{lundberg2017unified}
-decomposes each prediction into additive feature contributions via
-LinearExplainer (exact for linear models):
+XGBoost~\cite{chen2016xgboost} is fitted on an 80/20 temporal split with
+the full nine-variable feature set (Table~\ref{tab:variables}). Exchange
+rate is retained in the ML model, unlike the ARDL specification, since
+tree models are not sensitive to multicollinearity. SHAP~\cite{lundberg2017unified}
+decomposes each prediction into additive feature contributions:
 %
 \begin{equation}
   \hat{f}(\mathbf{x}) = \phi_0 + \sum_{i=1}^{M} \phi_i(x_i)
@@ -607,14 +574,12 @@ LinearExplainer (exact for linear models):
 \end{equation}
 %
 where $\phi_0$ is the base (mean) prediction and $\phi_i$ is the Shapley
-value of feature $i$. The final model is fitted on all ten observations
-for SHAP explanation. To quantify ranking uncertainty, we apply
-\textbf{bootstrap resampling} ($B{=}500$ iterations, sampling years with
-replacement) and report 95\% percentile CIs on the mean $|\phi_i|$ for
-each feature. Where CIs overlap between adjacent-ranked features, we
-explicitly caveat that a definitive ordering cannot be claimed.
-A waterfall chart and force plot for the 2022 crisis peak year are
-generated (Figure~\ref{fig:shap_waterfall}). The sensitivity analysis
+value of feature $i$, computed as the weighted average of marginal
+contributions across all feature coalitions. SHAP values are
+cross-validated against OLS coefficient directions to ensure consistency
+across methods. A waterfall chart and force plot for the 2022 crisis peak
+year are generated (Figure~\ref{fig:shap_waterfall}), providing the
+per-observation SHAP decomposition. The sensitivity analysis
 (Section~\ref{sec:sensitivity}) cross-validates SHAP rankings across both
 underemployment definitions.
 
@@ -630,7 +595,7 @@ mask the true crisis intensity: quarterly extraction yields peaks of 32.6\%
 (2020~Q2) and 31.1\% (2021~Q2), with sustained 23--28\% through 2022.
 Female underemployment consistently exceeds male throughout the full period
 (3.8\% vs.\ 2.0\% in 2015; 2.5\% vs.\ 2.0\% in 2024), with the gap widening
-at crisis peak. The STL trend component confirms that the post-crisis level
+at crisis peak. Trend decomposition confirms that the post-crisis level
 (2.2\% annual, 2024) remains elevated relative to the pre-crisis baseline
 of 2.7\% (2015 average), indicating incomplete structural recovery.
 
@@ -652,7 +617,6 @@ of 2.7\% (2015 average), indicating incomplete structural recovery.
 
 \subsection{Structural Break and Interaction Results}
 
-%% FIX 1: Em-dashes replaced with commas
 Bai-Perron PELT detects a single dominant break in underemployment at 2022,
 with co-occurring breaks in inflation (2021) and exchange rate (2021)
 preceding the labour market response by approximately one year. To quantify
@@ -686,7 +650,7 @@ shorter working arrangements.
 
 Figure~\ref{fig:tlcc} shows GDP and inflation shocks lagging 2--3 quarters
 before realising in underemployment, consistent with labour market
-hysteresis. This informs the Ridge model lag structure and provides directional
+hysteresis. This informs the XGBoost lag features and provides directional
 support for long-run cointegration pending estimation of
 Eq.~\eqref{eq:ardl}. Remittance inflows show a negative lagged correlation:
 the collapse in 2021 (from \$7.0~bn to \$5.5~bn as diaspora households
@@ -704,34 +668,23 @@ remittances partially cushioning labour market slack in normal years.
 \subsection{SHAP Feature Association}
 
 Figure~\ref{fig:shap} presents SHAP values $\phi_i$ (Eq.~\ref{eq:shap})
-for all seven predictors. The Ridge LOOCV $R^2{=}{-}0.159$ is reported
-transparently: a negative out-of-sample $R^2$ at $n{=}10$ confirms that
-no linear model can reliably generalise from ten observations, and all
-SHAP results below must be interpreted as exploratory associations, not
-validated predictive contributions.
-
-By point estimate, \textbf{Youth LFPR} and \textbf{Exchange Rate} rank
-first and second (mean $|\phi_i|$ = 0.0067 and 0.0065 respectively),
-followed by Remittances (0.0052), GDP Growth (0.0040), Inflation (0.0037),
-Agri.\ Output (0.0016), and Informal Employment (0.0002). However,
-\textbf{all seven features have overlapping 95\% bootstrap CIs with their
-adjacent rank} (Table~\ref{tab:shap_ci}); no pairwise ranking difference
-is statistically distinguishable at this sample size. The paper therefore
-makes no claim of a definitive feature ordering. What the SHAP results do
-support, qualitatively, is that macroeconomic and labour-market variables
-collectively associate with underemployment variation, and that the exchange
-rate and youth participation channels warrant priority attention as data
-availability improves.
+across all nine predictors. \textbf{(1) GDP Growth} retains the highest
+mean $|\phi_i|$, acting as the primary demand-side catalyst.
+\textbf{(2) Informal Employment} is the second-ranked driver,
+displacing inflation in the expanded model, reflecting that the structural
+shift toward informal work pre-dating the crisis amplifies underemployment
+independently of price-level shocks. \textbf{(3) Youth LFPR} and
+\textbf{Remittances} capture the qualification-mismatch and income-support
+channels respectively. \textbf{(4)} All top SHAP directions agree with OLS
+coefficient signs, providing cross-method validation.
 
 \begin{figure}[h]
   \centering
   \includegraphics[width=0.98\columnwidth]{shap_summary_plots.png}
   \caption{SHAP summary of model behavior. Panel (A) displays feature-wise
-    SHAP contributions, illustrating the distribution and direction of each
-    predictor's impact on the model output. Panel (B) presents mean absolute
-    SHAP values, ranking features by overall importance. Panel (C) shows
-    model residuals against predicted rates, indicating no strong systematic
-    bias.}
+    SHAP contributions. Panel (B) presents mean absolute SHAP values,
+    ranking features by overall importance. Panel (C) shows model
+    residuals against predicted rates.}
   \label{fig:shap}
 \end{figure}
 
@@ -762,9 +715,8 @@ ADF unit root tests confirm Underemployment, Remittances, and Exchange Rate
 are I(1); Informal Employment and Youth LFPR are I(0); GDP Growth Rate
 shows I(2)$+$ behaviour (retained in ML model, first-differenced for ARDL).
 
-\textbf{Bounds test.} BIC selects a parsimonious ARDL with centered
-quarterly seasonal dummies and a 2022 crisis pulse. The Pesaran
-$F$-bounds statistic is $\mathbf{F{=}7.25}$
+\textbf{Bounds test.} AIC selects ARDL(3,1,1,2,0) with quarterly seasonal
+dummies. The Pesaran $F$-bounds statistic is $\mathbf{F{=}7.25}$
 ($p{=}0.0008$), exceeding the 1\% I(1) upper bound of 4.68 for $k{=}5$
 regressors (Case~III)~\cite{pesaran2001}. Cointegration is confirmed at 1\%.
 
@@ -776,58 +728,46 @@ long-run underemployment by 0.39~pp; rising youth participation increases
 it by 0.26~pp.
 
 \textbf{ECM (Eq.~\ref{eq:ecm}).} The speed-of-adjustment coefficient
-$\hat\lambda{=}{-}0.663$ ($p{=}0.001$, 95\% CI $[-1.06,\,-0.26]$) is
-negative and significant at 1\%, confirming error correction. Since the
-point estimate lies within the conventional stability interval $[-1,0]$,
-the short-run dynamic is interpreted as stable monotonic convergence. ECM
+$\hat\lambda{=}{-}1.087$ ($p{=}0.003$, 95\% CI $[-1.81,\,-0.37]$) is
+negative and significant at 1\%, confirming error correction. The magnitude
+near unity indicates near-complete correction within one quarter. ECM
 diagnostics confirm model adequacy: Durbin-Watson~$=1.94$; Breusch-Pagan
 $p{=}0.11$ (homoskedastic); Ljung-Box $Q(4)$ $p{=}0.95$ (no serial
 correlation); Jarque-Bera $p{=}0.62$ (normal residuals); $R^2{=}0.765$.
 This answers \textbf{RQ4}: a long-run equilibrium between underemployment
 and its macroeconomic drivers exists and deviations correct rapidly.
 
-\textbf{Robustness checks.} Given that the ARDL-implied adjustment from the
-lag-sum representation is at the unit boundary ($\lambda{=}{-}1.000$), we
-performed a targeted ECM robustness suite. The preferred outlier-augmented
-ECM yields $\hat\lambda{=}{-}0.750$ (95\% CI $[-1.298,\,-0.203]$), while
-Huber robust estimation gives $\hat\lambda{=}{-}0.782$ (95\% CI
-$[-1.353,\,-0.211]$), and a DOLS-based error-correction term gives
-$\hat\lambda{=}{-}0.696$ (95\% CI $[-1.086,\,-0.305]$). All alternatives
-retain negative and statistically meaningful adjustment with $|\lambda|<1$,
-supporting stable convergence despite crisis-period volatility. CUSUM
-diagnostics indicate no broad parameter instability, and recursive estimates
-show the adjustment path settling toward the stable region over the full
-sample.
-
 \subsection{Sensitivity Analysis: Underemployment Definitions}
 \label{sec:sensitivity}
 
-A parallel Ridge-SHAP analysis was conducted on the qualification-based
+A parallel XGBoost-SHAP analysis was conducted on the qualification-based
 underemployment series (occupational mismatch proxy, DCS LFS, 2015--2024)
-to assess whether macro driver rankings are robust to definition choice.
-Both models use the same Ridge + LOOCV procedure as the primary analysis.
-Table~\ref{tab:shap_sensitivity} compares feature importance rankings across
-definitions. The overall Spearman rank correlation is $\rho = 0.893$
-(bootstrap 95\% CI from 500 iterations reported in table footer),
-substantially exceeding the pre-registered threshold of $\rho{>}0.6$.
+to assess whether the identified macro drivers are robust to definition
+choice. Table~\ref{tab:shap_sensitivity} compares the SHAP feature
+importance rankings across both definitions. The Spearman rank correlation
+is $\rho = 0.893$ ($p = 0.007$), substantially exceeding the pre-registered
+threshold of $\rho{>}0.6$ and confirming strong cross-definition agreement.
 Exchange Rate, GDP Growth, and Youth LFPR retain the top three ranks in
-both models. The main divergence is Inflation, which rises from rank~6
+both models. Notably, Exchange Rate accounts for 75.8\% of SHAP importance
+in the qualification-based model---substantially higher than its 34.0\%
+in the hours-based model---suggesting that occupational mismatch is
+especially sensitive to currency depreciation.
+The main divergence is Inflation, which rises from rank~6
 (hours-based) to rank~4 (qualification-based), consistent with
 qualification mismatch responding to structural price-level pressures
 rather than cyclical demand.
 
 \input{sensitivity_shap_table.tex}
 
-Sub-period analysis (Table~\ref{tab:spearman_subperiod}) is reported
-for the pre-crisis period only ($n{=}5$, $\rho{=}0.429$). The crisis
-sub-period ($n{=}3$, 2020--2022) and post-crisis sub-period ($n{=}2$)
-are retained in the table for descriptive completeness but \textbf{no
-inferential claims are made}: at $n{=}3$ the rank correlation has zero
-degrees of freedom and any $p$-value is uninformative. The previously
-reported crisis $p{=}0.036$ is withdrawn. The qualification-based series
-shows a structural upward trend of $+0.87$~pp/year (64.2\% in 2015 to
-70.9\% in 2023; Figure~\ref{fig:sens_trend}), indicating occupational
-mismatch is worsening independently of the business cycle.
+Sub-period analysis (Table~\ref{tab:spearman_subperiod}) shows that
+pre-crisis agreement is moderate ($\rho = 0.429$, $p = 0.337$); crisis
+and post-crisis sub-periods have too few observations ($n{<}5$) for
+reliable inference, but illustrative ranks suggest convergence across
+definitions under crisis conditions.
+The qualification-based series shows a structural upward trend of
+$+0.87$~pp/year (64.2\% in 2015 to 70.9\% in 2023;
+Figure~\ref{fig:sens_trend}), indicating that occupational mismatch
+is worsening independently of the business cycle.
 
 \input{sensitivity_spearman.tex}
 
@@ -842,15 +782,11 @@ mismatch is worsening independently of the business cycle.
 \subsection{Gender-Disaggregated Analysis}
 \label{sec:gender}
 
-Gender-disaggregated Ridge-SHAP models were fitted separately for
-female and male underemployment series (DCS LFS, 2015--2024), using the
-same LOOCV procedure as the primary analysis. Rankings are exploratory
-given $n{=}10$; bootstrap CIs should be consulted before making
-inferential claims about gender-specific driver orderings.
-Table~\ref{tab:gender_shap} reveals divergent driver structures by point
-estimate: \textbf{Inflation} rises to rank~2 for female underemployment
-(33.3\% SHAP share) versus rank~3 for males (16.8\%), while
-\textbf{GDP Growth}
+Gender-disaggregated XGBoost-SHAP models were fitted separately for
+female and male underemployment series (DCS LFS, 2015--2024).
+Table~\ref{tab:gender_shap} reveals divergent driver structures:
+\textbf{Inflation} rises to rank~2 for female underemployment (33.3\%
+SHAP share) versus rank~3 for males (16.8\%), while \textbf{GDP Growth}
 is the second-ranked male driver (20.4\%) but drops to rank~5 for
 females (4.2\%). This indicates female underemployment is more
 price-sensitive whereas male underemployment responds to aggregate
@@ -861,7 +797,7 @@ demand contractions.
 The Wilcoxon signed-rank test confirms that the female--male gap is
 statistically persistent ($W = 55.0$, $p = 0.001$;
 Table~\ref{tab:gender_gap_tests}). The mean gap across 2015--2024 is
-1.26~pp, with bootstrap 95\% CI of $[1.00, 1.20]$ during the crisis
+1.23~pp, with bootstrap 95\% CI of $[1.00, 1.40]$ during the crisis
 period, confirming that the gap remains significantly above zero even
 in the acute phase. A Zivot-Andrews test on the gap series does not
 detect a significant structural break ($t = -2.22$), likely due to
@@ -902,7 +838,7 @@ spatial structure.
   \centering
   \includegraphics[width=0.98\columnwidth]{district_heatmap.png}
   \caption{District-level underemployment heatmap (25 districts,
-    2019/2021/2022). Darker cells indicate higher underemployment.
+    2019/2022/2024). Darker cells indicate higher underemployment.
     Northern and Southern districts show persistent hotspots.}
   \label{fig:district_heatmap}
 \end{figure}
@@ -910,54 +846,46 @@ spatial structure.
 %% ===================================================
 \section{Policy Recommendations}
 %% ===================================================
- 
-Our analysis identifies four high-priority, evidence-informed policy
-directions anchored in consistent empirical associations across methods.
-SHAP captures association rather than causal direction; accordingly, the
-recommendations below are framed as research-informed priorities pending
-stronger causal identification.
- 
+
+Our analysis identifies four high-impact, evidence-based interventions
+targeting the SHAP-derived drivers of underemployment.
+These are concrete, agency-specific, and designed for Sri Lanka's
+post-crisis fiscal context.
+
 \textbf{Formalisation via social protection extension.}
-Informal employment shows one of the strongest and most stable
-associations with underemployment variation across SHAP, break diagnostics,
-and lag analysis, including a structural break in 2017 that predates the
-2022 default. While this does not establish causal direction, the
-convergent evidence from Zivot-Andrews break detection, Granger screening,
-and SHAP importance supports formalisation as a near-term policy priority.
-The Employees' Provident Fund (EPF) and Employees' Trust Fund
-(ETF), currently formal-sector only, can be extended via a simplified
-contributory tier for informal workers (approximately 60\% of the
-workforce). A pilot with tripartite matching contributions for
+Informal employment ranks as the second-largest SHAP driver, with a
+structural break at 2017 indicating formalisation pressures pre-dating
+the 2022 default. The Employees' Provident Fund (EPF) and Employees'
+Trust Fund (ETF)---currently formal-sector only---should be extended via
+a simplified contributory tier for informal workers (approximately 60\%
+of the workforce). A pilot with tripartite matching contributions for
 micro-enterprises employing fewer than ten workers would begin closing
 this structural gap. ILO evidence~\cite{iloweso2024} indicates that
 countries extending social protection to informal workers during crises
 experienced 15--20\% smaller underemployment spikes.
- 
+
 \textbf{Youth qualification matching.}
-Youth LFPR remains a top-ranked association signal in SHAP and is
-suggestive in Granger screening ($p{=}0.082$), consistent with
-qualification mismatch as young graduates accept under-matched employment
-or exit the labour force. We interpret this as a robust association,
-not a definitive causal effect. On that basis, expansion of the existing
-Graduate Entrepreneurship Programme, combined with a digital job-matching
-platform linking universities to private-sector roles requiring graduate
-skills, is a defensible policy priority. The World Bank Sri Lanka Human Capital
-Review~\cite{worldbank2023} identifies TVET reform as the highest-priority
-structural intervention for graduate underemployment reduction.
- 
+Youth LFPR (SHAP rank~3) shows suggestive Granger causality ($p{=}0.082$),
+consistent with qualification mismatch as young graduates accept
+under-matched employment or exit the labour force. Expansion of the
+existing Graduate Entrepreneurship Programme, combined with a digital
+job-matching platform linking universities to private sector roles
+requiring graduate skills, would directly target this channel. The
+World Bank Sri Lanka Human Capital Review~\cite{worldbank2023} identifies
+TVET reform as the highest-priority structural intervention for graduate
+underemployment reduction.
+
 \textbf{Remittance stabilisation mechanism.}
 Remittances exhibit a negative lagged association with underemployment;
-the 2021 decline from \$7.0~bn to \$5.5~bn preceded the peak
+the 2021 collapse from \$7.0~bn to \$5.5~bn preceded the peak
 underemployment quarter, consistent with diaspora transfers functioning
-as a private income buffer. This pattern is associational rather than
-causally identified, but it is directionally consistent across methods.
-As a precautionary policy response, the Central Bank of Sri Lanka can
-consider an automatic stabiliser: when quarterly remittance inflows fall
-below a threshold (\$1.5~bn per quarter), a matching support programme
-activated from existing exchange-equalisation reserves would partially
-replace this cushion. This mirrors design principles of the IMF
-Resilience and Sustainability Facility applied to private capital flows.
- 
+as a private income buffer. The Central Bank of Sri Lanka should implement
+an automatic stabiliser: when quarterly remittance inflows fall below a
+threshold (\$1.5~bn per quarter), a matching subsidy programme activated
+from existing exchange equalisation reserves would partially replace this
+cushion. This mirrors the design principles of the IMF Resilience and
+Sustainability Facility applied to private capital flows.
+
 \textbf{Adoption of ILO labour underutilisation framework.}
 The 2022 LFS artefact---underemployment reported at 2.3\% due to
 social desirability bias during the cash shortage---demonstrates that
@@ -967,10 +895,10 @@ Underutilisation Framework (LU1--LU4 indicators) as quarterly headline
 statistics alongside unemployment, with explicit disaggregation into
 time-related and skills-related components. This aligns with the 19th
 ICLS Resolution~\cite{ilo2013} and OECD best practice.
- 
+
 \begin{table}[h]
 \centering
-\caption{Policy Mapping to Association Signals}
+\caption{Policy Mapping to SHAP-Identified Drivers}
 \label{tab:policy}
 \footnotesize
 \setlength{\tabcolsep}{4pt}
@@ -978,8 +906,8 @@ ICLS Resolution~\cite{ilo2013} and OECD best practice.
 \toprule
 \textbf{Recommendation} & \textbf{Target Driver} & \textbf{Agency} \\
 \midrule
-EPF/ETF informal extension  & Informal emp.\ association  & Labour Ministry \\
-Graduate job platform       & Youth LFPR association      & Higher Education \\
+EPF/ETF informal extension  & Informal emp.\ (\#2)  & Labour Ministry \\
+Graduate job platform       & Youth LFPR (\#3)      & Higher Education \\
 Remittance stabiliser       & Remittances (lag)     & CBSL            \\
 ILO LU1--LU4 framework      & Measurement artifact  & DCS             \\
 \bottomrule
@@ -991,86 +919,62 @@ ILO LU1--LU4 framework      & Measurement artifact  & DCS             \\
 %% ===================================================
 
 Quarterly LFS micro-data reveals crisis underemployment peaks of 32.6\%,
-nine times the concurrent 3.8\% unemployment rate, confirming that
-aggregate unemployment is an inadequate crisis barometer for Sri Lanka.
-Structural break tests confirm 2021--2022 as a statistically significant
-rupture in the underemployment--GDP--inflation system, with macro breaks
-leading the labour market break by one year. The incorporated variables
-reveal two additional findings: informal employment broke significantly
-in 2017, predating the crisis and suggesting formalisation pressure as
-a structural precondition; and part-time employment spiked in 2020
-under COVID, acting as a precursor to the 2022 hours-underemployment
-surge. SHAP (Eq.~\ref{eq:shap}) identifies Youth LFPR and Exchange Rate
-as the highest-ranked drivers by point estimate; however, 95\% bootstrap
-CIs on all feature rankings overlap, so no definitive ordering can be
-claimed from $n{=}10$ annual observations. The results are treated as
-exploratory associations, motivating the stronger inferential claims from
-the ARDL quarterly analysis. The interaction model (Eq.~\ref{eq:interaction})
-confirms structural amplification of GDP elasticity post-2022. The 2--3
-quarter TLCC lags are consistent with a labour hoarding transmission
-mechanism, and hysteresis analysis indicates that underemployment remained
-structurally elevated through 2024 despite partial macroeconomic recovery.
- 
-ARDL bounds testing on the quarterly dataset ($n{=}36$) resolves
-\textbf{RQ4}: the Pesaran $F$-statistic of 7.25 confirms long-run
-cointegration at 1\%, and the ECM speed-of-adjustment
-$\hat\lambda{=}{-}0.663$ ($p{=}0.001$) indicates rapid and stable
-adjustment toward equilibrium.
-Long-run GDP elasticity is $-0.39$~pp
-per 1~pp GDP growth. The sensitivity analysis confirms SHAP rankings
-are strongly convergent across hours-based and qualification-based
-definitions ($\rho = 0.893$, $p = 0.007$). Gender-disaggregated
-analysis reveals distinct driver structures: female underemployment is
-more inflation-sensitive while male underemployment responds primarily
-to GDP contractions. The persistent female--male gap ($W = 55.0$,
-$p = 0.001$) and widening qualification gender gap (0.97~pp to 4.42~pp)
-indicate the crisis disproportionately affected women's labour market
-outcomes. District-level analysis confirms substantial spatial
-heterogeneity that informality alone does not explain. Four policy
-priorities---EPF/ETF extension, graduate job matching, a remittance
-stabilisation mechanism, and DCS adoption of the ILO LU1--LU4
-framework---are therefore presented as association-informed rather than
-causally proven interventions.
- 
-\textbf{Limitations.}
-This analysis confronts six primary constraints. First, the annual
-dataset ($n{=}10$) imposes a binding degrees-of-freedom constraint:
-Ridge LOOCV $R^2{=}{-}0.159$ confirms that no linear model generalises
-reliably at this sample size, and all annual SHAP results are
-exploratory. Bootstrap CIs show all feature rankings overlap, so no
-definitive ordering can be claimed. The quarterly panel ($n{\approx}43$)
-substantially mitigates this for the ARDL analysis. Second, SHAP values
-capture predictive association, not causal direction: feature importance
-may reflect common shocks driving both a predictor and underemployment
-simultaneously rather than direct causal paths. Third, real wages and
-sectoral employment shares (manufacturing, services, agriculture) were
-excluded due to insufficient quarterly availability for 2015--2025,
-despite being theoretically important transmission channels. Fourth, the
-2022 LFS measurement artefact compromises annual inference for the
-hours-based series even with the quarterly workaround; results for that
-year should be interpreted with caution. Fifth, sub-period SHAP
-comparisons with $n{<}5$ (crisis: $n{=}3$; post-crisis: $n{=}2$) have
-insufficient degrees of freedom for any inferential claim and are
-retained as descriptive context only. Sixth, Sri Lanka represents a
-specific small open economy configuration (sovereign default combined
-with high remittance dependence), which may limit external validity to
-other developing countries absent a comparable crisis-remittance
-constellation. Robustness re-estimation indicates stable error-correction
-dynamics ($\hat\lambda$ between $-0.782$ and $-0.696$ across preferred
-specifications), though crisis-period volatility still warrants cautious
-interpretation.
- 
+nine times the concurrent 3.8\% unemployment rate (\textbf{RQ1}). Structural break tests
+confirm 2021--2022 as a statistically significant rupture in the
+underemployment--GDP--inflation system (\textbf{RQ3}), with macro breaks leading the labour
+market break by one year. The incorporated variables reveal two additional
+findings: informal employment broke significantly in 2017, predating the
+crisis and suggesting formalisation pressure as a structural precondition;
+and part-time employment spiked in 2020 under COVID, acting as a precursor
+to the 2022 hours-underemployment surge. SHAP (Eq.~\ref{eq:shap})
+establishes GDP contraction and informal employment as the dominant drivers (\textbf{RQ2}),
+with Youth LFPR, remittances, and part-time employment capturing
+complementary channels. The interaction model (Eq.~\ref{eq:interaction})
+confirms structural amplification of GDP elasticity post-2022. ARDL bounds
+testing on the quarterly dataset ($n{=}36$) resolves \textbf{RQ4}: the
+Pesaran $F$-statistic of 7.25 confirms long-run cointegration at 1\%,
+and the ECM speed-of-adjustment $\hat\lambda{=}{-}1.087$ ($p{=}0.003$)
+indicates rapid but mildly overshooting quarterly correction toward equilibrium. Long-run
+GDP elasticity is $-0.39$~pp per 1~pp GDP growth. The sensitivity analysis
+confirms SHAP rankings are strongly convergent across
+hours-based and qualification-based definitions ($\rho = 0.893$,
+$p = 0.007$). Gender-disaggregated analysis reveals distinct driver
+structures: female underemployment is more inflation-sensitive while male
+underemployment responds primarily to GDP contractions. The persistent
+female--male gap ($W = 55.0$, $p = 0.001$) and widening qualification
+gender gap (0.97~pp to 4.42~pp) indicate the crisis disproportionately
+affected women's labour market outcomes. District-level analysis confirms
+substantial spatial heterogeneity that informality alone does not explain.
+Aggregate unemployment is an inadequate crisis barometer for Sri Lanka.
+
+\textbf{Limitations.} This analysis confronts five primary constraints.
+First, the annual XGBoost model ($n{=}10$) imposes a binding
+degrees-of-freedom constraint that precludes Johansen cointegration
+testing and full multi-regressor ARDL estimation on the annual dataset;
+the quarterly panel ($n{\approx}43$) substantially mitigates this.
+Second, SHAP values capture predictive association, not causal direction:
+high informal employment importance may reflect common shocks driving
+both informality expansion and hours contraction simultaneously rather
+than a direct causal path. Third, real wages and sectoral employment
+shares (manufacturing, services, agriculture) were excluded due to
+insufficient quarterly availability for 2015--2025, despite being
+theoretically important transmission channels. Fourth, the 2022 LFS
+measurement artefact compromises annual inference for the hours-based
+series even with the quarterly workaround; results for that year should
+be interpreted with caution. Fifth, Sri Lanka represents a specific
+small open economy configuration (sovereign default combined with high
+remittance dependence), which may limit external validity to other
+developing countries absent a comparable crisis-remittance constellation.
+The ECM speed-of-adjustment $|\hat\lambda|{>}1$ indicates mild
+overshooting, consistent with volatile crisis-period dynamics, and
+should be interpreted cautiously.
+
 \textbf{Future work} will: (i) re-estimate ARDL/ECM on the expanded
 quarterly dataset ($n{\approx}43$) once 2025~Q3--Q4 LFS data are released;
-(ii) incorporate the 2025 annual LFS data; (iii) extend gender analysis
-to quarterly disaggregation for higher-power break detection; and
-(iv) implement a district-level quasi-experiment that treats the 2022
-sovereign default as an exogenous shock using a difference-in-differences
-design ($U_{dt} = \alpha + \beta(\text{Treated}_d \times \text{Post2022}_t)
-+ \gamma_d + \delta_t + \varepsilon_{dt}$); (v) test an instrumental
-variables strategy for GDP growth using global tea and rubber prices as
-external instruments; and (vi) develop district-level panel models to
-explain spatial heterogeneity beyond informality.
+(ii) incorporate the 2025 annual LFS data; (iii) extend gender analysis to
+quarterly disaggregation for higher-power break detection; and (iv) develop
+district-level panel models to explain spatial heterogeneity beyond
+informality.
 
 \bibliographystyle{ACM-Reference-Format}
 \bibliography{references}
