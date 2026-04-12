@@ -10,6 +10,17 @@ labour_data_analysis_copy/
 *.pdf
 *.zip
 
+# LaTeX build artifacts
+*.aux
+*.bbl
+*.blg
+*.log
+*.out
+*.tex.bak
+
+# Markdown files (member notes)
+*.md
+
 !requirements.txt
 !current_latest_paper/*.pdf
 !current_latest_paper/*.zip
