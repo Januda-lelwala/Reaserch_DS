@@ -160,9 +160,10 @@ quarterly frequency using the Denton-Cholette method~\cite{denton1971}.
 \begin{table}[htbp]
 \caption{Variable Summary (Annual 2015--2024)}
 \label{tab:variables}
+\centering
 \setlength{\tabcolsep}{3.5pt}
 \footnotesize
-\begin{tabular}{lll}
+\begin{tabular}{@{}lll@{}}
 \toprule
 \textbf{Variable} & \textbf{Source} & \textbf{Unit}\\
 \midrule
@@ -195,9 +196,10 @@ both predating the sovereign default.
 \caption{Zivot-Andrews Structural Break Results, Model C.
   Critical value at 5\% is $-5.08$.}
 \label{tab:za}
-\setlength{\tabcolsep}{3pt}
-\footnotesize
-\begin{tabular}{lccc}
+\centering
+\setlength{\tabcolsep}{2pt}
+\scriptsize
+\begin{tabular}{@{}lcrc@{}}
 \toprule
 \textbf{Variable} & \textbf{Break} & \textbf{ZA stat} & \textbf{Sig.}\\
 \midrule
@@ -213,7 +215,7 @@ Agri.\ output     & 2020 & $-4.50$  & --  \\
 Discouraged wkrs  & 2020 & $-3.26$  & --  \\
 TRU female        & 2020 & $-3.65$  & --  \\
 \midrule
-\multicolumn{4}{l}{\scriptsize ***$p{<}0.01$, **$p{<}0.05$, -- not sig.}\\
+\multicolumn{4}{@{}l@{}}{\scriptsize ***$p{<}0.01$, **$p{<}0.05$, -- not sig.}\\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -223,15 +225,15 @@ maxlag=4), Agricultural Output Index is the only predictor clearing the
 Bonferroni-corrected threshold ($F{=}11.91$, $p{=}0.0016$). The
 ARDL($p,q$) specification is:
 %
-\begin{equation}
+\begin{multline}
   \Delta U_t = \alpha_0
     + \sum_{i=1}^{p}\phi_i\,\Delta U_{t-i}
-    + \sum_{j=0}^{q}\boldsymbol{\beta}_j'\,\Delta\mathbf{x}_{t-j}
+    + \sum_{j=0}^{q}\boldsymbol{\beta}_j'\,\Delta\mathbf{x}_{t-j} \\
     + \lambda_1 U_{t-1}
     + \boldsymbol{\lambda}_2'\mathbf{x}_{t-1}
     + \varepsilon_t
   \label{eq:ardl}
-\end{equation}
+\end{multline}
 %
 where $\lambda_1$ and $\boldsymbol{\lambda}_2$ are tested via Pesaran's
 $F$-bounds procedure~\cite{pesaran2001}. AIC selects ARDL(3,1,1,2,0)
