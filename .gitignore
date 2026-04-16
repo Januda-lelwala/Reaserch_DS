@@ -25,3 +25,5 @@ labour_data_analysis_copy/
 !current_latest_paper/*.pdf
 !current_latest_paper/*.zip
 !Kusal/*.pdf
+!mercon/*.pdf
+!mercon/*.zip
