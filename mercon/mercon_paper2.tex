@@ -20,11 +20,8 @@
 Findings from the 2015--2025 Period}
 
 \author{
-\IEEEauthorblockN{T.\,N.\,D.\,S.\,W. Ekanayake,~J.\,U.\,P. Lelwala,~D.\,W.\,K.\,G. Bulagala,~W.\,G.\,K. Pabasara,~B.\,K.\,P. De Silva}
-\IEEEauthorblockA{\textit{Department of Computer Science \& Engineering} \\
-\textit{University of Moratuwa} \\
-Moratuwa, Sri Lanka \\
-\{thisene.23, janudal.23, gimsarab.23, kusalp.23, praveend.23\}@cse.mrt.ac.lk}
+\IEEEauthorblockN{Anonymous}
+\IEEEauthorblockA{Submitted for double-blind review}
 }
 
 \maketitle
@@ -85,7 +82,7 @@ agricultural output, part-time employment, and discouraged workers as
 predictors; (3)~conduct gender-disaggregated SHAP analysis; and
 (4)~test structural breaks across 11 macro and labour series using
 Zivot-Andrews and Bai-Perron PELT. These directly address the three
-limitations of Pabasara and Silva~\cite{pabasara2025impact}: focus on
+limitations of~\cite{pabasara2025impact}: focus on
 aggregate unemployment, analysis terminating before the sovereign
 default, and linear VECM specifications unsuited to crisis-induced
 nonlinearities.
@@ -115,7 +112,7 @@ demand and informality across South and Southeast Asia; Islam and
 Verick~\cite{islam2011} identify delayed fiscal transmission into hours-based
 slack consistent with our 2--3 quarter TLCC lags.
 
-For Sri Lanka, Pabasara and Silva~\cite{pabasara2025impact} confirm Okun's
+For Sri Lanka, prior work~\cite{pabasara2025impact} confirms Okun's
 Law on aggregate unemployment via VECM (2005--2020~Q4) but do not address
 underemployment. Dissanayake~\cite{dissanayake2026} calls for crisis-updated
 forecasts motivating this work. Liyanapathirana and
@@ -147,6 +144,11 @@ deflating with bilateral CPIs:
   \frac{\text{CPI}_t^{\text{USA}}}{\text{CPI}_t^{\text{LKA}}}
   \label{eq:rer}
 \end{equation}
+%
+\noindent where $\text{RER}_t$ is the real exchange rate at time $t$,
+$e_t^{\text{nom}}$ is the nominal LKR/USD mid-rate,
+$\text{CPI}_t^{\text{USA}}$ is the U.S.\ Consumer Price Index, and
+$\text{CPI}_t^{\text{LKA}}$ is the Sri Lankan Consumer Price Index.
 
 The 2022 annual LFS reports underemployment at an implausibly low 2.3\%
 during a year of sovereign default; we use quarterly LFS data as the
@@ -235,7 +237,14 @@ ARDL($p,q$) specification is:
   \label{eq:ardl}
 \end{multline}
 %
-where $\lambda_1$ and $\boldsymbol{\lambda}_2$ are tested via Pesaran's
+\noindent where $\Delta U_t$ is the first difference of the
+underemployment rate, $\alpha_0$ is the intercept, $\phi_i$ are
+autoregressive coefficients over $p$ lags, $\boldsymbol{\beta}_j$ are
+short-run coefficient vectors for the predictor vector
+$\mathbf{x}_t$ over $q$ lags, $\lambda_1$ and
+$\boldsymbol{\lambda}_2$ are the level (long-run) coefficients tested
+via the bounds procedure, and $\varepsilon_t$ is the white-noise error
+term. Here $\lambda_1$ and $\boldsymbol{\lambda}_2$ are tested via Pesaran's
 $F$-bounds procedure~\cite{pesaran2001}. AIC selects ARDL(3,1,1,2,0)
 with seasonal dummies. The bounds $F$-statistic is 7.25 ($p{=}0.0008$),
 exceeding the 1\% upper critical value of 4.68 for $k{=}5$ predictors
@@ -248,6 +257,13 @@ exceeding the 1\% upper critical value of 4.68 for $k{=}5$ predictors
     + \varepsilon_t
   \label{eq:ecm}
 \end{equation}
+%
+\noindent where $\mu$ is a constant, $\lambda$ is the speed-of-adjustment
+coefficient (expected negative for convergence),
+$\widehat{\text{ECT}}_{t-1}$ is the lagged error correction term from the
+long-run equilibrium, $\psi_i$ are short-run autoregressive coefficients,
+and $\boldsymbol{\gamma}_j$ capture the short-run dynamics of the
+predictors $\mathbf{x}_t$.
 
 \subsection{Machine Learning and Interpretability}
 
@@ -260,7 +276,10 @@ prediction into additive feature contributions:
   \label{eq:shap}
 \end{equation}
 %
-where $\phi_i$ is the Shapley value of feature $i$. SHAP values are
+\noindent where $\hat{f}(\mathbf{x})$ is the model prediction for input
+$\mathbf{x}$, $\phi_0$ is the baseline (mean prediction), $\phi_i(x_i)$
+is the Shapley value attributing the contribution of the $i$-th feature,
+and $M$ is the total number of features. SHAP values are
 cross-validated against OLS coefficient directions for consistency.
 
 %% ============================================================
@@ -304,7 +323,10 @@ model:
   \label{eq:interaction}
 \end{equation}
 %
-achieves $R^2{=}0.495$ for GDP and $R^2{=}0.594$ for inflation
+\noindent where $U_t$ is the underemployment rate, $G_t$ is GDP growth,
+$D_t$ is a binary crisis dummy ($D_t{=}1$ for $t \geq 2022$),
+$\beta_3$ captures the structural shift in macro elasticity post-crisis,
+and $\varepsilon_t$ is the error term. This model achieves $R^2{=}0.495$ for GDP and $R^2{=}0.594$ for inflation
 (Fig.~\ref{fig:interaction}), confirming structural amplification of
 macro elasticities post-2022. Informal employment breaking at 2017
 suggests formalisation pressures predating the crisis.
@@ -508,11 +530,7 @@ quarterly availability. The 2022 LFS measurement artefact requires
 cautious interpretation. External validity may be limited to economies
 with comparable crisis-remittance constellations.
 
-\section*{Acknowledgment}
-
-The authors thank the Department of Census and Statistics, Sri Lanka,
-and the Central Bank of Sri Lanka for providing access to the Labour
-Force Survey and macroeconomic time series used in this study.
+%% Acknowledgment removed for double-blind review
 
 \bibliographystyle{IEEEtran}
 \bibliography{references}
